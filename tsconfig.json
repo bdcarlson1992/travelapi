@@ -14,12 +14,15 @@
     "typeRoots": ["./node_modules/@types"], 
     "resolveJsonModule": true 
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],  // Include both backend .ts and frontend .tsx files
+  "include": [
+    "src/**/*.ts", 
+    "src/**/*.tsx" // Include both backend `.ts` and frontend `.tsx` files
+  ],
   "exclude": [
     "node_modules", 
     "dist", 
-    "src/components/**/*.tsx",  // Exclude React components if they are not relevant to backend
-    "src/**/*.test.ts",          // Optionally exclude tests
-    "src/**/*.test.tsx"          // Optionally exclude React test files
+    "src/components/**/*.tsx", // Exclude React components if not relevant to backend
+    "src/**/*.test.ts",        // Optionally exclude backend test files
+    "src/**/*.test.tsx"        // Optionally exclude frontend test files
   ]
 }
