@@ -17,21 +17,31 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const groq_1 = require("./services/groq");
 const itinerary_1 = __importDefault(require("./routes/itinerary"));
-dotenv_1.default.config();
+dotenv_1.default.config(); // Load environment variables from .env file
 // Check if the GROQ API Key is present
 console.log('GROQ API Key present:', !!process.env.GROQ_API_KEY);
 const app = (0, express_1.default)();
-// CORS configuration
+// Environment-based CORS configuration
+const allowedOrigins = [
+    'https://travel-frontend-iqm0ykwxl-brians-projects-df69fd22.vercel.app', // Production frontend
+    'http://localhost:5173' // Local development
+];
 app.use((0, cors_1.default)({
-    origin: process.env.NODE_ENV === 'production'
-        ? process.env.FRONTEND_URL || 'http://localhost:5173' // Make this configurable
-        : 'http://localhost:5173',
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl)
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: ['GET', 'POST'],
-    credentials: true
+    credentials: true, // Allow cookies if needed
 }));
 // Body parser middleware
 app.use(express_1.default.json());
-// Direct route for getting recommendations
+// Route: Recommendations API
 app.post('/api/recommendations', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         console.log('Received request with body:', JSON.stringify(req.body, null, 2));
@@ -51,7 +61,9 @@ app.post('/api/recommendations', (req, res) => __awaiter(void 0, void 0, void 0,
 }));
 // Mount itinerary routes
 app.use('/api/itinerary', itinerary_1.default);
+// Set the PORT
 const PORT = process.env.PORT || 3001;
+// Start the server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
