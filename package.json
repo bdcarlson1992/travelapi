@@ -20,12 +20,14 @@
     "express": "^4.21.2",
     "groq-sdk": "^0.9.1",
     "openai": "^4.77.3",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0",
-    "@types/react": "^19.0.6",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.0.0",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2"
   }

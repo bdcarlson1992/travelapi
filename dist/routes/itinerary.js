@@ -12,8 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const groq_1 = require("../services/groq");
 const router = (0, express_1.Router)();
-// Define route handler with generic RequestHandler type
-const handleItineraryRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Define the route with proper type for the request body
+router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Received itinerary request:', {
         body: req.body,
         preferences: req.body.preferences,
@@ -50,7 +50,5 @@ const handleItineraryRequest = (req, res) => __awaiter(void 0, void 0, void 0, f
             });
         }
     }
-});
-// Use the route handler for POST / (root path since we're already mounted at /api/itinerary)
-router.post('/', handleItineraryRequest);
+}));
 exports.default = router;

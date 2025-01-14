@@ -1,4 +1,4 @@
-import { Router, Request, Response, RequestHandler } from 'express';
+import { Router, Request, Response } from 'express';
 import { RecommendationRequest } from '../types';
 import { getDetailedItinerary } from '../services/groq';
 
@@ -7,11 +7,11 @@ const router = Router();
 // Define the structure of the request body for the itinerary
 interface ItineraryRequestBody {
   preferences: RecommendationRequest;
-  destination: string;
+  destination: any; // Updated as per your request
 }
 
-// Define route handler with generic RequestHandler type
-const handleItineraryRequest: RequestHandler<{}, any, ItineraryRequestBody, {}> = async (req, res): Promise<void> => {
+// Define the route with proper type for the request body
+router.post('/', async (req: Request<{}, {}, ItineraryRequestBody>, res: Response) => {
   console.log('Received itinerary request:', {
     body: req.body,
     preferences: req.body.preferences,
@@ -51,9 +51,6 @@ const handleItineraryRequest: RequestHandler<{}, any, ItineraryRequestBody, {}> 
       });
     }
   }
-};
-
-// Use the route handler for POST / (root path since we're already mounted at /api/itinerary)
-router.post('/', handleItineraryRequest);
+});
 
 export default router;
