@@ -1,22 +1,25 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "lib": ["es6", "dom"],
-    "jsx": "react-jsx", // Ensures React 17+ JSX transform
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node"
+    "target": "es6", 
+    "module": "commonjs", 
+    "lib": ["es6", "dom"], 
+    "jsx": "react-jsx", 
+    "outDir": "./dist", 
+    "rootDir": "./src", 
+    "strict": true, 
+    "esModuleInterop": true, 
+    "skipLibCheck": true, 
+    "forceConsistentCasingInFileNames": true, 
+    "moduleResolution": "node", 
+    "typeRoots": ["./node_modules/@types"], 
+    "resolveJsonModule": true 
   },
-  "include": ["src/**/*.ts"], // Include only backend TypeScript files
+  "include": ["src/**/*.ts", "src/**/*.tsx"],  // Include both backend .ts and frontend .tsx files
   "exclude": [
     "node_modules", 
-    "src/components/**/*.tsx", // Exclude React components
-    "src/**/*.test.ts",        // Optionally exclude tests if you have them
-    "src/**/*.test.tsx"        // Optionally exclude React test files
+    "dist", 
+    "src/components/**/*.tsx",  // Exclude React components if they are not relevant to backend
+    "src/**/*.test.ts",          // Optionally exclude tests
+    "src/**/*.test.tsx"          // Optionally exclude React test files
   ]
 }
