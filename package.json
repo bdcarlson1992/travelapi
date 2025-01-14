@@ -11,7 +11,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Backend API for Travel Application",
   "dependencies": {
     "@types/node": "^22.10.5",
     "amadeus": "^11.0.0",

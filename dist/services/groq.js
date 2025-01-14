@@ -151,7 +151,7 @@ Always respond in this exact JSON format:
 // Fetch detailed itinerary
 function getDetailedItinerary(preferences, destination) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
+        var _a, _b, _c, _d;
         try {
             const prompt = createItineraryPrompt(preferences, destination);
             console.log('Sending itinerary prompt to Groq:', prompt);
@@ -231,7 +231,9 @@ Always respond in this exact JSON format:
                 model: "mixtral-8x7b-32768",
                 temperature: 0.7,
             });
-            return (_b = (_a = completion.choices[0]) === null || _a === void 0 ? void 0 : _a.message) === null || _b === void 0 ? void 0 : _b.content;
+            // Log the returned itinerary to debug
+            console.log('Detailed Itinerary:', (_b = (_a = completion.choices[0]) === null || _a === void 0 ? void 0 : _a.message) === null || _b === void 0 ? void 0 : _b.content);
+            return (_d = (_c = completion.choices[0]) === null || _c === void 0 ? void 0 : _c.message) === null || _d === void 0 ? void 0 : _d.content;
         }
         catch (error) {
             console.error('Groq API error:', error);

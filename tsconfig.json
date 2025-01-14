@@ -12,6 +12,11 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*.ts"], // Include only backend TypeScript files
+  "exclude": [
+    "node_modules", 
+    "src/components/**/*.tsx", // Exclude React components
+    "src/**/*.test.ts",        // Optionally exclude tests if you have them
+    "src/**/*.test.tsx"        // Optionally exclude React test files
+  ]
 }

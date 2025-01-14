@@ -51,6 +51,6 @@ const handleItineraryRequest = (req, res) => __awaiter(void 0, void 0, void 0, f
         }
     }
 });
-// Use the route handler for POST /itinerary
-router.post('/itinerary', handleItineraryRequest);
+// Use the route handler for POST / (root path since we're already mounted at /api/itinerary)
+router.post('/', handleItineraryRequest);
 exports.default = router;

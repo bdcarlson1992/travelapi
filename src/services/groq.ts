@@ -221,6 +221,9 @@ Always respond in this exact JSON format:
       temperature: 0.7,
     });
 
+    // Log the returned itinerary to debug
+    console.log('Detailed Itinerary:', completion.choices[0]?.message?.content);
+
     return completion.choices[0]?.message?.content;
   } catch (error) {
     console.error('Groq API error:', error);
@@ -230,3 +233,4 @@ Always respond in this exact JSON format:
 
 // Export the groq instance
 export { groq };
+
