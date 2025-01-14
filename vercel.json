@@ -7,26 +7,30 @@
     }
   ],
   "rewrites": [
-    { 
-      "source": "/(.*)", 
-      "destination": "/src/index.ts" 
+    {
+      "source": "/(.*)",
+      "destination": "/src/index.ts"
     }
   ],
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/api/(.*)",
       "headers": [
-        { 
-          "key": "Access-Control-Allow-Origin", 
-          "value": "*"
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://travel-frontend-7dupsowm4-brians-projects-df69fd22.vercel.app"
         },
-        { 
-          "key": "Access-Control-Allow-Methods", 
-          "value": "GET, POST, OPTIONS" 
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "OPTIONS,POST,GET"
         },
-        { 
-          "key": "Access-Control-Allow-Headers", 
-          "value": "Content-Type" 
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type"
+        },
+        {
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
         }
       ]
     }
