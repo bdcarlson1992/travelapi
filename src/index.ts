@@ -1,4 +1,4 @@
-Copyimport express, { Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { getDestinationRecommendations } from './services/groq';
@@ -17,13 +17,14 @@ const allowedOrigins = [
   'http://localhost:5173' // Local development
 ];
 
+// Enable pre-flight for all routes
+app.options('*', cors()); // Enable pre-flight for all routes
+
 app.use(cors({
-  origin: [
-    'https://travel-frontend-7dupsowm4-brians-projects-df69fd22.vercel.app', // Your frontend's Vercel domain
-    'http://localhost:5173' // For local development
-  ],
-  methods: ['GET', 'POST'],
-  credentials: true
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type']
 }));
 
 // Body parser middleware
@@ -58,6 +59,15 @@ const PORT = process.env.PORT || 3001;
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+// Error handler middleware
+app.use((err: any, req: Request, res: Response, next: any) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    success: false, 
+    error: 'Internal Server Error' 
+  });
 });
 
 export default app;
