@@ -14,9 +14,10 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL || 'http://localhost:5173'  // Make this configurable
-    : 'http://localhost:5173',
+  origin: [
+    'https://travel-frontend-iqm0ykwxl-brians-projects-df69fd22.vercel.app',
+    'http://localhost:5173' // keep this for local development
+  ],
   methods: ['GET', 'POST'],
   credentials: true
 }));
