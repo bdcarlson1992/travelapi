@@ -11,20 +11,11 @@ console.log('GROQ API Key present:', !!process.env.GROQ_API_KEY);
 
 const app = express();
 
-// Single source of truth for allowed origins
-const allowedOrigins = [
-  'https://travel-frontend-7dupsowm4-brians-projects-df69fd22.vercel.app', // Latest production frontend
-  'http://localhost:5173' // Local development
-];
-
-// Enable pre-flight for all routes
-app.options('*', cors()); // Enable pre-flight for all routes
-
+// Simplest CORS configuration to start with
 app.use(cors({
-  origin: allowedOrigins,
+  origin: '*',  // Allow all origins temporarily
   methods: ['GET', 'POST', 'OPTIONS'],
-  credentials: true,
-  allowedHeaders: ['Content-Type']
+  credentials: false  // Set to false when using origin: '*'
 }));
 
 // Body parser middleware
@@ -53,21 +44,21 @@ app.post(
 // Mount itinerary routes
 app.use('/api/itinerary', itineraryRouter);
 
-// Set the PORT
-const PORT = process.env.PORT || 3001;
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
-// Error handler middleware
+// Error handler middleware - place this after all routes
 app.use((err: any, req: Request, res: Response, next: any) => {
   console.error(err.stack);
   res.status(500).json({ 
     success: false, 
     error: 'Internal Server Error' 
   });
+});
+
+// Set the PORT
+const PORT = process.env.PORT || 3001;
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
 
 export default app;
