@@ -17,28 +17,48 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const groq_1 = require("./services/groq");
 const itinerary_1 = __importDefault(require("./routes/itinerary"));
-dotenv_1.default.config(); // Load environment variables from .env file
-// Check if the GROQ API Key is present
+dotenv_1.default.config();
 console.log('GROQ API Key present:', !!process.env.GROQ_API_KEY);
 const app = (0, express_1.default)();
-// Environment-based CORS configuration
-const allowedOrigins = [
-    'https://travel-frontend-iqm0ykwxl-brians-projects-df69fd22.vercel.app', // Production frontend
-    'http://localhost:5173' // Local development
-];
+// CORS configuration
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps or curl)
-        if (!origin || allowedOrigins.includes(origin)) {
+        console.log('Request origin:', origin); // Debug log
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) {
             callback(null, true);
+            return;
         }
-        else {
-            callback(new Error('Not allowed by CORS'));
+        // Define allowed domains
+        const allowedDomains = [
+            'https://travel-frontend-self.vercel.app', // Your main frontend domain
+            'http://localhost:5173', // Local development
+            /https:\/\/.*\.vercel\.app$/ // All vercel.app preview deployments
+        ];
+        // Check if the origin is allowed
+        const isAllowed = allowedDomains.some(domain => {
+            if (domain instanceof RegExp) {
+                return domain.test(origin);
+            }
+            return domain === origin;
+        });
+        if (isAllowed) {
+            console.log('Allowing origin:', origin);
+            callback(null, true);
+            return;
         }
+        console.log('Blocked origin:', origin);
+        callback(new Error('Not allowed by CORS'));
     },
-    methods: ['GET', 'POST'],
-    credentials: true, // Allow cookies if needed
+    methods: ['GET', 'POST', 'OPTIONS'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    next();
+});
 // Body parser middleware
 app.use(express_1.default.json());
 // Route: Recommendations API
@@ -59,12 +79,21 @@ app.post('/api/recommendations', (req, res) => __awaiter(void 0, void 0, void 0,
         }
     }
 }));
-// Mount itinerary routes
 app.use('/api/itinerary', itinerary_1.default);
-// Set the PORT
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Global error handler:', err);
+    res.status(500).json({
+        success: false,
+        error: process.env.NODE_ENV === 'development' ? err.message : 'An internal server error occurred'
+    });
+});
 const PORT = process.env.PORT || 3001;
-// Start the server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    console.log('CORS configuration active for:');
+    console.log('- travel-frontend-self.vercel.app');
+    console.log('- localhost:5173');
+    console.log('- All vercel.app preview deployments');
 });
 exports.default = app;
