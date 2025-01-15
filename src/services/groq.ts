@@ -1,26 +1,23 @@
 import Groq from "groq-sdk";
 import dotenv from 'dotenv';
-import { RecommendationRequest } from '../types'; // Use the updated type
+import { RecommendationRequest } from '../types';
 
 dotenv.config();
 
-// Check if the environment variable is defined
 const API_KEY = process.env.GROQ_API_KEY;
 if (!API_KEY) {
   throw new Error('Missing GROQ_API_KEY in environment variables');
 }
 
-// Initialize the Groq client
 const groq = new Groq({
   apiKey: API_KEY
 });
 
-// Prompt creation for destinations
 function createTravelPrompt(preferences: RecommendationRequest): string {
   const shortTrip = preferences.duration <= 3;
   const mediumTrip = preferences.duration > 3 && preferences.duration <= 7;
 
-  return `You are a travel expert considering flight logistics and realistic travel times. Based on these preferences, recommend 5 destinations:
+  return `As a Lonely Planet travel expert, recommend 5 destinations based on these parameters, focusing on practical insights and authentic experiences:
 
 Travel Parameters:
 - Starting from: ${preferences.startingPoint}
@@ -31,66 +28,48 @@ Travel Parameters:
 - Budget per person: $${preferences.budgetPerPerson}
 - ${preferences.isInternational ? 'International destinations allowed' : 'Domestic destinations only'}
 
-Important Travel Time Considerations:
+Travel Time Considerations:
 ${shortTrip ? 
-  '- This is a very short trip. Only recommend destinations that are either: ' +
-  '\n a) Within a 3-hour direct flight from ' + preferences.startingPoint +
-  '\n b) Or accessible by a short drive/train ride' +
-  '\n - Factor in airport transit times and check-in/security times in recommendations'
+  '- Short trip focus: Recommend destinations either:\n' +
+  '  a) Within a 3-hour direct flight from ' + preferences.startingPoint + '\n' +
+  '  b) Or accessible by a short drive/train ride\n' +
+  '- Factor in practical transit times and airport logistics'
   : 
   mediumTrip ?
-  '- This is a medium-length trip. Only recommend destinations that are: ' +
-  '\n a) Within a 6-hour direct flight from ' + preferences.startingPoint +
-  '\n b) Or reachable within half a day of total travel time' +
-  '\n - Consider time zones and jet lag in your recommendations'
+  '- Medium trip focus: Recommend destinations:\n' +
+  '  a) Within a 6-hour direct flight from ' + preferences.startingPoint + '\n' +
+  '  b) Or reachable within half a day of travel\n' +
+  '- Consider time zones and adjustment periods'
   :
-  '- For this longer trip, destinations can be further away, but still consider: ' +
-  '\n a) Total travel time including connections' +
-  '\n b) Time zones and jet lag recovery' +
-  '\n c) Ensuring enough time to experience the destination'
+  '- Extended trip possibilities:\n' +
+  '  a) Can include more distant destinations\n' +
+  '  b) Factor in jet lag recovery\n' +
+  '  c) Allow time for deeper exploration'
 }`;
 }
 
-// Prompt creation for itinerary
 function createItineraryPrompt(preferences: RecommendationRequest, destination: any): string {
-  return `Create a detailed travel itinerary for ${preferences.duration} days in ${destination.city}, ${destination.country}.
+  return `As a Lonely Planet expert, create a detailed ${preferences.duration}-day itinerary for ${destination.city}, ${destination.country}. Focus on insider knowledge, practical tips, and authentic experiences.
 
 Travel Context:
-- Group of ${preferences.travelers} traveler(s)
+- ${preferences.travelers} traveler(s)
 - Interests: ${preferences.tripType.join(', ')}
-- Travel dates: ${preferences.specificDates.start || preferences.month}
-- Budget per person: $${preferences.budgetPerPerson}
+- When: ${preferences.specificDates.start || preferences.month}
+- Budget: $${preferences.budgetPerPerson}/person
 - Starting from: ${preferences.startingPoint}
 
-Please provide:
-1. Travel Requirements:
-   - Required visas and permits
-   - Vaccination requirements
-   - Important local customs and etiquette
-   - Currency and payment recommendations
-
-2. Transportation:
-   - Best way to reach ${destination.city} from ${preferences.startingPoint}
-   - Local transportation options and recommendations
-   - Estimated travel times between locations
-
-3. Budget Breakdown:
-   - Transportation costs (flights, local transport)
-   - Accommodation costs
-   - Food and dining expenses
-   - Activity and entrance fees
-   - Miscellaneous expenses
-
-4. Day-by-Day Itinerary:
-   Consider weather, opening hours, local events, and logical geographic flow between activities.
-   Factor in travel time between locations and potential jet lag.
-   Include meal recommendations at local establishments within budget.
-
-If the trip duration is over 5 days, suggest nearby destinations that could be combined into a multi-city itinerary.
-Always keep recommendations within the specified budget and consider the traveler's interests.`;
+Provide rich details like:
+- Hidden gems and local favorites
+- Best times to visit specific sites
+- Money-saving tips and local hacks
+- Cultural insights and etiquette
+- Common tourist pitfalls to avoid
+- Seasonal considerations
+- Local transport tricks
+- Photography spots and timing
+- Alternative options for popular sites`;
 }
 
-// Fetch destination recommendations
 export async function getDestinationRecommendations(preferences: RecommendationRequest) {
   try {
     const prompt = createTravelPrompt(preferences);
@@ -100,7 +79,7 @@ export async function getDestinationRecommendations(preferences: RecommendationR
       messages: [
         {
           role: "system",
-          content: `You are a travel expert that provides detailed, personalized destination recommendations. 
+          content: `You are a Lonely Planet travel expert providing destination recommendations. 
 Always respond in this exact JSON format:
 {
   "destinations": [
@@ -114,10 +93,12 @@ Always respond in this exact JSON format:
         "climate": 3.8,
         "activities": 4.7
       },
-      "matchReason": "Detailed explanation why this matches their preferences",
-      "activities": ["Activity 1", "Activity 2", "Activity 3"],
+      "matchReason": "Engaging explanation of why this destination is perfect",
+      "highlights": ["Key attraction 1", "Key attraction 2", "Key attraction 3"],
+      "localInsights": ["Insider tip 1", "Insider tip 2"],
       "bestAreas": ["Area 1", "Area 2"],
-      "seasonalConsiderations": "Weather and timing considerations"
+      "seasonalConsiderations": "Time-specific advice and weather insights",
+      "practicalTips": ["Practical tip 1", "Practical tip 2"]
     }
   ]
 }`
@@ -138,7 +119,6 @@ Always respond in this exact JSON format:
   }
 }
 
-// Fetch detailed itinerary
 export async function getDetailedItinerary(preferences: RecommendationRequest, destination: any) {
   try {
     const prompt = createItineraryPrompt(preferences, destination);
@@ -148,68 +128,53 @@ export async function getDetailedItinerary(preferences: RecommendationRequest, d
       messages: [
         {
           role: "system",
-          content: `You are a travel expert creating detailed itineraries. 
+          content: `You are a Lonely Planet expert creating detailed itineraries. 
 Always respond in this exact JSON format:
 {
-  "travelRequirements": {
-    "visas": ["requirement 1", "requirement 2"],
-    "vaccinations": ["requirement 1", "requirement 2"],
-    "customs": ["custom 1", "custom 2"],
-    "currencyTips": ["tip 1", "tip 2"]
-  },
-  "transportation": {
-    "arrival": {
-      "method": "string",
-      "duration": "string",
-      "cost": number,
-      "details": "string"
-    },
-    "local": {
-      "options": ["option 1", "option 2"],
-      "recommendations": "string",
-      "estimatedCosts": number
-    }
-  },
-  "budgetBreakdown": {
-    "transportation": number,
-    "accommodation": number,
-    "food": number,
-    "activities": number,
-    "miscellaneous": number
+  "tripHighlights": {
+    "overview": "Engaging summary of the itinerary",
+    "mainAttractions": ["Must-see 1", "Must-see 2", "Must-see 3"],
+    "seasonalTips": "Time-specific advice",
+    "practicalTips": ["Key practical tip 1", "Key practical tip 2"]
   },
   "locations": [
     {
-      "name": "string",
+      "name": "Location name",
       "coordinates": [number, number],
-      "type": "string"
+      "type": "Point of interest type"
     }
   ],
   "dailyItinerary": [
     {
       "day": number,
-      "activities": ["activity 1", "activity 2"],
-      "meals": {
-        "breakfast": "string",
-        "lunch": "string",
-        "dinner": "string"
+      "activities": [
+        {
+          "name": "Activity name",
+          "description": "Rich description including historical/cultural context",
+          "duration": "Time needed",
+          "additionalInfo": "Practical details and tips"
+        }
+      ],
+      "localInsights": {
+        "bestTime": "Optimal timing advice",
+        "tips": ["Insider tip 1", "Insider tip 2"],
+        "culturalNotes": "Local customs and etiquette"
       },
-      "accommodation": "string",
-      "transportationType": "string",
+      "transportationType": "Local transport details",
+      "accommodation": "Where to stay",
       "estimatedCosts": {
         "activities": number,
-        "meals": number,
         "transport": number
       }
     }
   ],
-  "nearbyDestinations": [
-    {
-      "city": "string",
-      "distance": "string",
-      "travelTime": "string",
-      "recommendedDays": number
-    }
-  ]
+  "budgetBreakdown": {
+    "transportation": number,
+    "accommodation": number,
+    "activities": number,
+    "food": number,
+    "miscellaneous": number
+  }
 }`
         },
         {
@@ -221,9 +186,7 @@ Always respond in this exact JSON format:
       temperature: 0.7,
     });
 
-    // Log the returned itinerary to debug
     console.log('Detailed Itinerary:', completion.choices[0]?.message?.content);
-
     return completion.choices[0]?.message?.content;
   } catch (error) {
     console.error('Groq API error:', error);
@@ -231,6 +194,4 @@ Always respond in this exact JSON format:
   }
 }
 
-// Export the groq instance
 export { groq };
-
