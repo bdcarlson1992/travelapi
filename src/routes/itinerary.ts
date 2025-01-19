@@ -53,29 +53,24 @@ interface ParsedItinerary {
 
 const cleanAndValidateJSON = (jsonString: string): ParsedItinerary => {
   try {
+    // Clean the string by removing invalid syntax
     const cleanedString = jsonString
       .replace(/\\n/g, ' ')
       .replace(/\\"/g, '"')
       .replace(/\s+/g, ' ')
-      .replace(/\/\/.*/g, '')
-      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/\/\/.*(?=\n|$)/g, '') // Remove single-line comments
+      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+      .replace(/,(?=\s*[\]}])/g, '') // Remove trailing commas
       .trim();
 
-    try {
-      return JSON.parse(cleanedString) as ParsedItinerary;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error('JSON parsing error:', error);
-        throw new Error(`JSON parsing failed: ${error.message}`);
-      }
-      throw new Error('JSON parsing failed: Unknown error');
-    }
+    // Parse the cleaned string into JSON
+    return JSON.parse(cleanedString) as ParsedItinerary;
   } catch (error: unknown) {
     if (error instanceof Error) {
-      console.error('String cleaning error:', error);
-      throw new Error(`String cleaning failed: ${error.message}`);
+      console.error('JSON parsing error:', error.message);
+      throw new Error(`JSON parsing failed: ${error.message}`);
     }
-    throw new Error('String cleaning failed: Unknown error');
+    throw new Error('JSON parsing failed: Unknown error');
   }
 };
 
@@ -121,11 +116,11 @@ router.post('/', async (req: Request<{}, {}, ItineraryRequestBody>, res: Respons
     } catch (parseError: unknown) {
       console.error('Parsing Error Details:', parseError);
       console.error('Raw itinerary that failed to parse:', rawItinerary);
-      
-      const errorMessage = parseError instanceof Error 
-        ? parseError.message 
+
+      const errorMessage = parseError instanceof Error
+        ? parseError.message
         : 'Unknown parsing error occurred';
-      
+
       return res.status(500).json({
         success: false,
         error: `Failed to parse itinerary: ${errorMessage}`,
@@ -134,11 +129,11 @@ router.post('/', async (req: Request<{}, {}, ItineraryRequestBody>, res: Respons
     }
   } catch (error: unknown) {
     console.error('General Error:', error);
-    
-    const errorMessage = error instanceof Error 
-      ? error.message 
+
+    const errorMessage = error instanceof Error
+      ? error.message
       : 'An unknown error occurred';
-    
+
     return res.status(500).json({
       success: false,
       error: errorMessage

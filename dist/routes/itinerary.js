@@ -14,30 +14,24 @@ const groq_1 = require("../services/groq");
 const router = (0, express_1.Router)();
 const cleanAndValidateJSON = (jsonString) => {
     try {
+        // Clean the string by removing invalid syntax
         const cleanedString = jsonString
             .replace(/\\n/g, ' ')
             .replace(/\\"/g, '"')
             .replace(/\s+/g, ' ')
-            .replace(/\/\/.*/g, '')
-            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/\/\/.*(?=\n|$)/g, '') // Remove single-line comments
+            .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+            .replace(/,(?=\s*[\]}])/g, '') // Remove trailing commas
             .trim();
-        try {
-            return JSON.parse(cleanedString);
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                console.error('JSON parsing error:', error);
-                throw new Error(`JSON parsing failed: ${error.message}`);
-            }
-            throw new Error('JSON parsing failed: Unknown error');
-        }
+        // Parse the cleaned string into JSON
+        return JSON.parse(cleanedString);
     }
     catch (error) {
         if (error instanceof Error) {
-            console.error('String cleaning error:', error);
-            throw new Error(`String cleaning failed: ${error.message}`);
+            console.error('JSON parsing error:', error.message);
+            throw new Error(`JSON parsing failed: ${error.message}`);
         }
-        throw new Error('String cleaning failed: Unknown error');
+        throw new Error('JSON parsing failed: Unknown error');
     }
 };
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
