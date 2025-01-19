@@ -45,39 +45,39 @@ ${shortTrip ?
   '  a) Can include more distant destinations\n' +
   '  b) Factor in jet lag recovery\n' +
   '  c) Allow time for deeper exploration'
-}`;
+}
+
+Remember to provide all numeric values as proper numbers without currency symbols or ranges.`;
 }
 
 function createItineraryPrompt(preferences: RecommendationRequest, destination: any): string {
-  return `As a travel expert with deep knowledge of international travel requirements, create a detailed ${preferences.duration}-day itinerary for ${destination.city}, ${destination.country}, including comprehensive travel requirements. 
-  Assume the traveler is a citizen of the country where ${preferences.startingPoint} is located.
+  return `Create a detailed ${preferences.duration}-day itinerary for ${destination.city}, ${destination.country}. 
+The traveler is from ${preferences.startingPoint}.
 
 Travel Context:
-- ${preferences.travelers} traveler(s) from ${preferences.startingPoint}
+- ${preferences.travelers} traveler(s)
 - Interests: ${preferences.tripType.join(', ')}
 - When: ${preferences.specificDates.start || preferences.month}
 - Budget: $${preferences.budgetPerPerson}/person
 
-Focus on providing:
+Include:
+1. Entry requirements for ${preferences.startingPoint} citizens
+2. Health/vaccination requirements
+3. Local currency and money tips
+4. Customs regulations
+5. Daily activities with exact costs in numbers only
+6. Transport recommendations with exact costs
+7. Safety information
+8. Seasonal considerations
 
-1. Accurate visa and entry requirements for citizens from ${preferences.startingPoint} traveling to ${destination.country}
-2. Current health and vaccination requirements
-3. Local currency information and financial considerations
-4. Customs regulations and cultural considerations
-5. Detailed daily activities and practical tips
-6. Local transportation and accommodation recommendations
-7. Safety considerations and emergency information
-8. Seasonal considerations and weather advice
+IMPORTANT: For all costs, provide exact numbers without currency symbols or ranges. 
+For example, use "transport": 15 instead of "transport": "15 EUR" or "transport": "10-20".
 
-For travel requirements, be specific about:
-- Exact visa types and processes
-- Required documentation
-- Processing times and fees
-- Health insurance requirements
-- Vaccination requirements
-- Currency restrictions
-- Prohibited items
-- Local laws and customs`;
+Ensure all financial values are:
+- Whole numbers only
+- No currency symbols
+- No ranges (use averages instead)
+- No text in cost fields`;
 }
 
 export async function getDestinationRecommendations(preferences: RecommendationRequest) {
@@ -90,6 +90,7 @@ export async function getDestinationRecommendations(preferences: RecommendationR
         {
           role: "system",
           content: `You are a Lonely Planet travel expert providing destination recommendations. 
+All numeric values must be proper numbers without currency symbols or ranges.
 Always respond in this exact JSON format:
 {
   "destinations": [
@@ -136,78 +137,54 @@ export async function getDetailedItinerary(preferences: RecommendationRequest, d
         {
           role: "system",
           content: `You are a Lonely Planet expert creating detailed itineraries. 
+IMPORTANT: All cost values must be numbers only, without currency symbols or ranges.
 Always respond in this exact JSON format:
 {
   "tripHighlights": {
-    "overview": "Engaging summary of the itinerary",
-    "mainAttractions": ["Must-see 1", "Must-see 2", "Must-see 3"]
+    "overview": "string",
+    "mainAttractions": ["string"]
   },
   "travelRequirements": {
-    "visas": [
-      "Detailed visa requirements specific to travelers from starting point",
-      "Processing times and fees",
-      "Required documentation"
-    ],
-    "vaccinations": [
-      "Required vaccinations",
-      "Recommended vaccinations",
-      "Health insurance requirements"
-    ],
-    "currencyTips": [
-      "Local currency details",
-      "Exchange rate tips",
-      "Payment methods accepted",
-      "Banking information"
-    ],
-    "customs": [
-      "Import restrictions",
-      "Prohibited items",
-      "Duty-free allowances",
-      "Cultural considerations"
-    ],
-    "entryRequirements": [
-      "Passport requirements",
-      "Required forms",
-      "Proof of funds requirements"
-    ],
-    "healthAndSafety": [
-      "Emergency numbers",
-      "Medical facility information",
-      "Local health considerations"
-    ]
+    "visas": ["string"],
+    "vaccinations": ["string"],
+    "currencyTips": ["string"],
+    "customs": ["string"],
+    "entryRequirements": ["string"],
+    "healthAndSafety": ["string"]
   },
   "locations": [
     {
-      "name": "Location name",
+      "name": "string",
       "coordinates": [number, number],
-      "type": "Point of interest type"
+      "type": "string"
     }
   ],
   "dailyItinerary": [
     {
-      "day": number,
+      "day": 1,
       "activities": [
         {
-          "name": "Activity name",
-          "description": "Rich description including historical/cultural context",
-          "duration": "Time needed",
-          "additionalInfo": "Practical details and tips"
+          "name": "string",
+          "description": "string",
+          "duration": "string",
+          "additionalInfo": "string"
         }
       ],
-      "transportationType": "Local transport details",
-      "accommodation": "Where to stay",
+      "transportationType": "string",
+      "accommodation": "string",
       "estimatedCosts": {
-        "activities": number,
-        "transport": number
+        "activities": 0,
+        "transport": 0,
+        "meals": 0
       }
     }
   ],
   "budgetBreakdown": {
-    "transportation": number,
-    "accommodation": number,
-    "activities": number,
-    "food": number,
-    "miscellaneous": number
+    "transportation": 0,
+    "accommodation": 0,
+    "activities": 0,
+    "food": 0,
+    "miscellaneous": 0
   }
 }`
         },
