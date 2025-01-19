@@ -49,25 +49,35 @@ ${shortTrip ?
 }
 
 function createItineraryPrompt(preferences: RecommendationRequest, destination: any): string {
-  return `As a Lonely Planet expert, create a detailed ${preferences.duration}-day itinerary for ${destination.city}, ${destination.country}. Focus on insider knowledge, practical tips, and authentic experiences.
+  return `As a travel expert with deep knowledge of international travel requirements, create a detailed ${preferences.duration}-day itinerary for ${destination.city}, ${destination.country}, including comprehensive travel requirements. 
+  Assume the traveler is a citizen of the country where ${preferences.startingPoint} is located.
 
 Travel Context:
-- ${preferences.travelers} traveler(s)
+- ${preferences.travelers} traveler(s) from ${preferences.startingPoint}
 - Interests: ${preferences.tripType.join(', ')}
 - When: ${preferences.specificDates.start || preferences.month}
 - Budget: $${preferences.budgetPerPerson}/person
-- Starting from: ${preferences.startingPoint}
 
-Provide rich details like:
-- Hidden gems and local favorites
-- Best times to visit specific sites
-- Money-saving tips and local hacks
-- Cultural insights and etiquette
-- Common tourist pitfalls to avoid
-- Seasonal considerations
-- Local transport tricks
-- Photography spots and timing
-- Alternative options for popular sites`;
+Focus on providing:
+
+1. Accurate visa and entry requirements for citizens from ${preferences.startingPoint} traveling to ${destination.country}
+2. Current health and vaccination requirements
+3. Local currency information and financial considerations
+4. Customs regulations and cultural considerations
+5. Detailed daily activities and practical tips
+6. Local transportation and accommodation recommendations
+7. Safety considerations and emergency information
+8. Seasonal considerations and weather advice
+
+For travel requirements, be specific about:
+- Exact visa types and processes
+- Required documentation
+- Processing times and fees
+- Health insurance requirements
+- Vaccination requirements
+- Currency restrictions
+- Prohibited items
+- Local laws and customs`;
 }
 
 export async function getDestinationRecommendations(preferences: RecommendationRequest) {
@@ -94,11 +104,8 @@ Always respond in this exact JSON format:
         "activities": 4.7
       },
       "matchReason": "Engaging explanation of why this destination is perfect",
-      "highlights": ["Key attraction 1", "Key attraction 2", "Key attraction 3"],
-      "localInsights": ["Insider tip 1", "Insider tip 2"],
-      "bestAreas": ["Area 1", "Area 2"],
-      "seasonalConsiderations": "Time-specific advice and weather insights",
-      "practicalTips": ["Practical tip 1", "Practical tip 2"]
+      "activities": ["Must-do activity 1", "Must-do activity 2", "Must-do activity 3"],
+      "seasonalConsiderations": "Time-specific advice and weather insights"
     }
   ]
 }`
@@ -133,9 +140,41 @@ Always respond in this exact JSON format:
 {
   "tripHighlights": {
     "overview": "Engaging summary of the itinerary",
-    "mainAttractions": ["Must-see 1", "Must-see 2", "Must-see 3"],
-    "seasonalTips": "Time-specific advice",
-    "practicalTips": ["Key practical tip 1", "Key practical tip 2"]
+    "mainAttractions": ["Must-see 1", "Must-see 2", "Must-see 3"]
+  },
+  "travelRequirements": {
+    "visas": [
+      "Detailed visa requirements specific to travelers from starting point",
+      "Processing times and fees",
+      "Required documentation"
+    ],
+    "vaccinations": [
+      "Required vaccinations",
+      "Recommended vaccinations",
+      "Health insurance requirements"
+    ],
+    "currencyTips": [
+      "Local currency details",
+      "Exchange rate tips",
+      "Payment methods accepted",
+      "Banking information"
+    ],
+    "customs": [
+      "Import restrictions",
+      "Prohibited items",
+      "Duty-free allowances",
+      "Cultural considerations"
+    ],
+    "entryRequirements": [
+      "Passport requirements",
+      "Required forms",
+      "Proof of funds requirements"
+    ],
+    "healthAndSafety": [
+      "Emergency numbers",
+      "Medical facility information",
+      "Local health considerations"
+    ]
   },
   "locations": [
     {
@@ -155,11 +194,6 @@ Always respond in this exact JSON format:
           "additionalInfo": "Practical details and tips"
         }
       ],
-      "localInsights": {
-        "bestTime": "Optimal timing advice",
-        "tips": ["Insider tip 1", "Insider tip 2"],
-        "culturalNotes": "Local customs and etiquette"
-      },
       "transportationType": "Local transport details",
       "accommodation": "Where to stay",
       "estimatedCosts": {
@@ -186,7 +220,6 @@ Always respond in this exact JSON format:
       temperature: 0.7,
     });
 
-    console.log('Detailed Itinerary:', completion.choices[0]?.message?.content);
     return completion.choices[0]?.message?.content;
   } catch (error) {
     console.error('Groq API error:', error);
