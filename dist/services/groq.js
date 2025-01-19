@@ -56,28 +56,38 @@ ${shortTrip ?
                     '- Extended trip possibilities:\n' +
                         '  a) Can include more distant destinations\n' +
                         '  b) Factor in jet lag recovery\n' +
-                        '  c) Allow time for deeper exploration'}`;
+                        '  c) Allow time for deeper exploration'}
+
+Remember to provide all numeric values as proper numbers without currency symbols or ranges.`;
 }
 function createItineraryPrompt(preferences, destination) {
-    return `As a Lonely Planet expert, create a detailed ${preferences.duration}-day itinerary for ${destination.city}, ${destination.country}. Focus on insider knowledge, practical tips, and authentic experiences.
+    return `Create a detailed ${preferences.duration}-day itinerary for ${destination.city}, ${destination.country}. 
+The traveler is from ${preferences.startingPoint}.
 
 Travel Context:
 - ${preferences.travelers} traveler(s)
 - Interests: ${preferences.tripType.join(', ')}
 - When: ${preferences.specificDates.start || preferences.month}
 - Budget: $${preferences.budgetPerPerson}/person
-- Starting from: ${preferences.startingPoint}
 
-Provide rich details like:
-- Hidden gems and local favorites
-- Best times to visit specific sites
-- Money-saving tips and local hacks
-- Cultural insights and etiquette
-- Common tourist pitfalls to avoid
-- Seasonal considerations
-- Local transport tricks
-- Photography spots and timing
-- Alternative options for popular sites`;
+Include:
+1. Entry requirements for ${preferences.startingPoint} citizens
+2. Health/vaccination requirements
+3. Local currency and money tips
+4. Customs regulations
+5. Daily activities with exact costs in numbers only
+6. Transport recommendations with exact costs
+7. Safety information
+8. Seasonal considerations
+
+IMPORTANT: For all costs, provide exact numbers without currency symbols or ranges. 
+For example, use "transport": 15 instead of "transport": "15 EUR" or "transport": "10-20".
+
+Ensure all financial values are:
+- Whole numbers only
+- No currency symbols
+- No ranges (use averages instead)
+- No text in cost fields`;
 }
 function getDestinationRecommendations(preferences) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -90,6 +100,7 @@ function getDestinationRecommendations(preferences) {
                     {
                         role: "system",
                         content: `You are a Lonely Planet travel expert providing destination recommendations. 
+All numeric values must be proper numbers without currency symbols or ranges.
 Always respond in this exact JSON format:
 {
   "destinations": [
@@ -104,11 +115,8 @@ Always respond in this exact JSON format:
         "activities": 4.7
       },
       "matchReason": "Engaging explanation of why this destination is perfect",
-      "highlights": ["Key attraction 1", "Key attraction 2", "Key attraction 3"],
-      "localInsights": ["Insider tip 1", "Insider tip 2"],
-      "bestAreas": ["Area 1", "Area 2"],
-      "seasonalConsiderations": "Time-specific advice and weather insights",
-      "practicalTips": ["Practical tip 1", "Practical tip 2"]
+      "activities": ["Must-do activity 1", "Must-do activity 2", "Must-do activity 3"],
+      "seasonalConsiderations": "Time-specific advice and weather insights"
     }
   ]
 }`
@@ -131,7 +139,7 @@ Always respond in this exact JSON format:
 }
 function getDetailedItinerary(preferences, destination) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d;
+        var _a, _b;
         try {
             const prompt = createItineraryPrompt(preferences, destination);
             console.log('Sending itinerary prompt to Groq:', prompt);
@@ -140,51 +148,54 @@ function getDetailedItinerary(preferences, destination) {
                     {
                         role: "system",
                         content: `You are a Lonely Planet expert creating detailed itineraries. 
+IMPORTANT: All cost values must be numbers only, without currency symbols or ranges.
 Always respond in this exact JSON format:
 {
   "tripHighlights": {
-    "overview": "Engaging summary of the itinerary",
-    "mainAttractions": ["Must-see 1", "Must-see 2", "Must-see 3"],
-    "seasonalTips": "Time-specific advice",
-    "practicalTips": ["Key practical tip 1", "Key practical tip 2"]
+    "overview": "string",
+    "mainAttractions": ["string"]
+  },
+  "travelRequirements": {
+    "visas": ["string"],
+    "vaccinations": ["string"],
+    "currencyTips": ["string"],
+    "customs": ["string"],
+    "entryRequirements": ["string"],
+    "healthAndSafety": ["string"]
   },
   "locations": [
     {
-      "name": "Location name",
+      "name": "string",
       "coordinates": [number, number],
-      "type": "Point of interest type"
+      "type": "string"
     }
   ],
   "dailyItinerary": [
     {
-      "day": number,
+      "day": 1,
       "activities": [
         {
-          "name": "Activity name",
-          "description": "Rich description including historical/cultural context",
-          "duration": "Time needed",
-          "additionalInfo": "Practical details and tips"
+          "name": "string",
+          "description": "string",
+          "duration": "string",
+          "additionalInfo": "string"
         }
       ],
-      "localInsights": {
-        "bestTime": "Optimal timing advice",
-        "tips": ["Insider tip 1", "Insider tip 2"],
-        "culturalNotes": "Local customs and etiquette"
-      },
-      "transportationType": "Local transport details",
-      "accommodation": "Where to stay",
+      "transportationType": "string",
+      "accommodation": "string",
       "estimatedCosts": {
-        "activities": number,
-        "transport": number
+        "activities": 0,
+        "transport": 0,
+        "meals": 0
       }
     }
   ],
   "budgetBreakdown": {
-    "transportation": number,
-    "accommodation": number,
-    "activities": number,
-    "food": number,
-    "miscellaneous": number
+    "transportation": 0,
+    "accommodation": 0,
+    "activities": 0,
+    "food": 0,
+    "miscellaneous": 0
   }
 }`
                     },
@@ -196,8 +207,7 @@ Always respond in this exact JSON format:
                 model: "mixtral-8x7b-32768",
                 temperature: 0.7,
             });
-            console.log('Detailed Itinerary:', (_b = (_a = completion.choices[0]) === null || _a === void 0 ? void 0 : _a.message) === null || _b === void 0 ? void 0 : _b.content);
-            return (_d = (_c = completion.choices[0]) === null || _c === void 0 ? void 0 : _c.message) === null || _d === void 0 ? void 0 : _d.content;
+            return (_b = (_a = completion.choices[0]) === null || _a === void 0 ? void 0 : _a.message) === null || _b === void 0 ? void 0 : _b.content;
         }
         catch (error) {
             console.error('Groq API error:', error);

@@ -6,26 +6,76 @@ const router = Router();
 
 interface ItineraryRequestBody {
   preferences: RecommendationRequest;
-  destination: any;
+  destination: {
+    city: string;
+    country: string;
+    matchScore: number;
+    activities: string[];
+    matchReason: string;
+  };
 }
 
-// Helper function to clean and validate JSON
-const cleanAndValidateJSON = (jsonString: string) => {
+interface DayItinerary {
+  day: number;
+  activities: Array<{
+    name: string;
+    description: string;
+    duration: string;
+    additionalInfo?: string;
+  }>;
+  transportationType: string;
+  accommodation: string;
+  estimatedCosts: {
+    activities: number;
+    transport: number;
+    meals: number;
+    [key: string]: number;
+  };
+}
+
+interface ParsedItinerary {
+  dailyItinerary: DayItinerary[];
+  budgetBreakdown: {
+    [key: string]: number;
+  };
+  travelRequirements: {
+    visas: string[];
+    vaccinations: string[];
+    currencyTips: string[];
+    customs: string[];
+  };
+  locations: Array<{
+    name: string;
+    coordinates: [number, number];
+    type: string;
+  }>;
+}
+
+const cleanAndValidateJSON = (jsonString: string): ParsedItinerary => {
   try {
-    // First, clean the string of any potential issues
     const cleanedString = jsonString
-      .replace(/\\n/g, ' ')           // Replace newlines with spaces
-      .replace(/\\"/g, '"')           // Fix escaped quotes
-      .replace(/\s+/g, ' ')           // Normalize whitespace
-      .replace(/\/\/.*/g, '')         // Remove single-line comments
-      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+      .replace(/\\n/g, ' ')
+      .replace(/\\"/g, '"')
+      .replace(/\s+/g, ' ')
+      .replace(/\/\/.*/g, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
       .trim();
 
-    // Try to parse the cleaned string
-    return JSON.parse(cleanedString);
-  } catch (error) {
-    console.error('JSON Cleaning/Parsing Error:', error);
-    throw new Error(`JSON parsing failed: ${error.message}`);
+    try {
+      return JSON.parse(cleanedString) as ParsedItinerary;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('JSON parsing error:', error);
+        throw new Error(`JSON parsing failed: ${error.message}`);
+      }
+      throw new Error('JSON parsing failed: Unknown error');
+    }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('String cleaning error:', error);
+      throw new Error(`String cleaning failed: ${error.message}`);
+    }
+    throw new Error('String cleaning failed: Unknown error');
   }
 };
 
@@ -57,11 +107,9 @@ router.post('/', async (req: Request<{}, {}, ItineraryRequestBody>, res: Respons
     }
 
     try {
-      // Clean and parse the itinerary
       const parsedItinerary = cleanAndValidateJSON(rawItinerary);
       console.log('Successfully parsed itinerary');
 
-      // Validate the required fields are present
       if (!parsedItinerary.dailyItinerary || !Array.isArray(parsedItinerary.dailyItinerary)) {
         throw new Error('Invalid itinerary format - missing or invalid dailyItinerary');
       }
@@ -70,22 +118,30 @@ router.post('/', async (req: Request<{}, {}, ItineraryRequestBody>, res: Respons
         success: true,
         itinerary: parsedItinerary
       });
-    } catch (parseError) {
+    } catch (parseError: unknown) {
       console.error('Parsing Error Details:', parseError);
       console.error('Raw itinerary that failed to parse:', rawItinerary);
       
+      const errorMessage = parseError instanceof Error 
+        ? parseError.message 
+        : 'Unknown parsing error occurred';
+      
       return res.status(500).json({
         success: false,
-        error: `Failed to parse itinerary: ${parseError.message}`,
-        rawData: rawItinerary // This helps with debugging
+        error: `Failed to parse itinerary: ${errorMessage}`,
+        rawData: rawItinerary
       });
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('General Error:', error);
+    
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : 'An unknown error occurred';
     
     return res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'An unknown error occurred'
+      error: errorMessage
     });
   }
 });
